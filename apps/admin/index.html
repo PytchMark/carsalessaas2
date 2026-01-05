@@ -1,71 +1,671 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Carsales SaaS — Admin</title>
+  <title>Carsales SaaS – Admin</title>
+
+  <style>
+    :root{
+      --bg:#050308; --bg2:#0a0610;
+      --ink:#fef2f2; --muted:#fca5a5;
+      --accent:#f97373; --accent2:#ef4444; --accentSoft:rgba(248,113,113,0.16);
+      --border:rgba(248,113,113,0.35);
+      --shadow:0 22px 46px rgba(15,23,42,0.95);
+      --shadowSoft:0 14px 28px rgba(15,23,42,0.85);
+      --good:#22c55e; --warn:#fbbf24; --bad:#fb7185;
+      --radius:18px; --radius2:24px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:var(--sans); color:var(--ink);
+      background: radial-gradient(circle at top left, #7f1d1d 0, #020617 42%, #020617 100%);
+      -webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit;text-decoration:none}
+    .hidden{display:none!important}
+
+    .wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:18px}
+    .card{
+      width:100%;
+      max-width:1240px;
+      background:
+        linear-gradient(145deg, rgba(248,250,252,0.085), rgba(10,6,16,0.98)),
+        radial-gradient(circle at top left, rgba(248,113,113,0.18), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(127,29,29,0.18), transparent 60%);
+      border-radius: var(--radius2);
+      border:1px solid rgba(248,113,113,0.35);
+      box-shadow:
+        0 0 0 1px rgba(15,23,42,0.85),
+        0 22px 46px rgba(15,23,42,0.95),
+        0 0 42px rgba(248,113,113,0.22);
+      padding:18px;
+      backdrop-filter: blur(16px);
+    }
+
+    .top{
+      display:flex; flex-wrap:wrap; gap:10px; justify-content:space-between; align-items:flex-start;
+      margin-bottom:12px;
+    }
+    .brand{display:flex; align-items:center; gap:10px}
+    .badge{
+      width:44px;height:44px;border-radius:40%;
+      background: radial-gradient(circle at 30% 0, #fee2e2, #f97373 45%, #7f1d1d 100%);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:900;font-size:20px;color:#fff;
+      box-shadow:0 0 0 1px rgba(248,113,113,0.9), 0 14px 28px rgba(248,113,113,0.55), 0 0 40px rgba(248,113,113,0.6);
+    }
+    .title{font-size:18px;font-weight:800;letter-spacing:0.03em}
+    .sub{font-size:12px;color:var(--muted); margin-top:3px}
+
+    .actions{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; align-items:center}
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 10px; border-radius:999px;
+      background:rgba(15,23,42,0.9);
+      border:1px solid rgba(248,113,113,0.55);
+      color:var(--muted); font-size:11px;
+      box-shadow:0 10px 22px rgba(15,23,42,0.88);
+    }
+    .dot{width:8px;height:8px;border-radius:999px;background:var(--warn);box-shadow:0 0 0 3px rgba(251,191,36,0.35)}
+    .dot.on{background:var(--good);box-shadow:0 0 0 3px rgba(34,197,94,0.45)}
+    .dot.err{background:var(--bad);box-shadow:0 0 0 3px rgba(251,113,133,0.30)}
+
+    .btn{
+      border-radius:999px; border:1px solid transparent;
+      padding:8px 14px; font-size:12px; font-weight:650;
+      display:inline-flex; align-items:center; gap:7px;
+      cursor:pointer; background:transparent; color:var(--ink);
+      transition:transform .1s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+      user-select:none;
+    }
+    .btn:disabled{opacity:.55; cursor:not-allowed}
+    .btn-ghost{
+      border-color: rgba(248,113,113,0.32);
+      background: rgba(15,23,42,0.60);
+      color: rgba(254,202,202,0.92);
+    }
+    .btn-ghost:hover{border-color: rgba(248,113,113,0.95); background: rgba(15,23,42,0.94); transform: translateY(-1px)}
+    .btn-primary{
+      background: radial-gradient(circle at top left, #f97373, #ef4444 45%, #991b1b 100%);
+      border-color: rgba(0,0,0,0.85);
+      color:#fff;
+      box-shadow:0 16px 34px rgba(127,29,29,0.78), 0 0 40px rgba(248,113,113,0.55);
+    }
+    .btn-primary:hover{transform:translateY(-1px); box-shadow:0 22px 44px rgba(127,29,29,0.86), 0 0 55px rgba(248,113,113,0.7)}
+    .btn-primary:active{transform:translateY(0); filter:brightness(0.98)}
+
+    .grid{
+      display:grid; grid-template-columns: 1fr; gap:12px;
+    }
+    @media(min-width:980px){
+      .grid{grid-template-columns: 0.38fr 0.62fr}
+    }
+
+    .panel{
+      background: rgba(15,23,42,0.92);
+      border:1px solid rgba(248,113,113,0.35);
+      border-radius: 20px;
+      padding:12px;
+      box-shadow: var(--shadowSoft);
+    }
+    .panel h3{margin:0 0 6px; font-size:13px; font-weight:800; letter-spacing:.03em}
+    .hint{font-size:12px;color:var(--muted); line-height:1.35}
+
+    .field{margin-top:10px}
+    .label{display:flex; justify-content:space-between; gap:8px; font-size:11px; color:var(--muted); margin-bottom:5px}
+    .input,.select,.textarea{
+      width:100%;
+      border-radius: 16px;
+      border:1px solid rgba(248,113,113,0.40);
+      background: rgba(15,23,42,0.88);
+      padding:10px 12px;
+      font-size:13px;
+      color:var(--ink);
+      outline:none;
+      transition:border-color .15s ease, box-shadow .15s ease, background .15s ease, transform .05s ease;
+    }
+    .input:focus,.select:focus,.textarea:focus{
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 1px rgba(248,113,113,0.65), 0 0 25px rgba(248,113,113,0.35);
+      background:#020617;
+      transform: translateY(-1px);
+    }
+    .textarea{min-height:90px; resize:vertical}
+    .row{display:grid; grid-template-columns: 1fr; gap:8px}
+    @media(min-width:560px){ .row.two{grid-template-columns: 1fr 1fr} }
+
+    /* Tabs */
+    .tabs{
+      display:flex; gap:6px; flex-wrap:wrap;
+      border-radius:999px; padding:4px;
+      background: rgba(15,23,42,0.95);
+      border:1px solid rgba(248,113,113,0.35);
+      box-shadow: 0 10px 24px rgba(15,23,42,0.95);
+    }
+    .tab{
+      border:none; cursor:pointer;
+      padding:6px 12px; border-radius:999px;
+      background:transparent;
+      color:var(--muted);
+      font-size:11px; font-weight:800; letter-spacing:.04em;
+      transition: background .12s ease, color .12s ease, transform .08s ease;
+    }
+    .tab.active{
+      background: var(--accentSoft);
+      color:#fee2e2;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(15,23,42,0.9);
+    }
+
+    /* Table */
+    .table-shell{overflow:hidden; border-radius:20px; border:1px solid rgba(248,113,113,0.35); background: rgba(15,23,42,0.96); box-shadow: var(--shadowSoft)}
+    .table-head{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid rgba(248,113,113,0.22); background: linear-gradient(to right, rgba(24,9,16,0.98), rgba(15,23,42,0.98))}
+    .table-title{font-size:13px; font-weight:800}
+    .table-meta{font-size:11px; color:var(--muted)}
+    .scroll{max-height:560px; overflow:auto}
+    table{width:100%; border-collapse:collapse; font-size:12px}
+    thead{position:sticky; top:0; background: rgba(15,23,42,0.98); z-index:1}
+    th,td{padding:9px 10px; text-align:left; border-bottom:1px solid rgba(30,41,59,0.95)}
+    th{font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted)}
+    tbody tr:hover{background: rgba(2,6,23,0.55)}
+    .mono{font-family:var(--mono); font-size:11px}
+    .badgeMini{
+      display:inline-flex; align-items:center; padding:3px 8px; border-radius:999px;
+      font-size:10px; border:1px solid rgba(248,113,113,0.45); background: rgba(248,113,113,0.10); color:#fee2e2;
+    }
+    .status{
+      display:inline-flex; align-items:center; padding:3px 9px; border-radius:999px;
+      font-size:10px; letter-spacing:.08em; text-transform:uppercase; border:1px solid transparent;
+    }
+    .available{background: rgba(34,197,94,0.14); color:#bbf7d0; border-color: rgba(34,197,94,0.65)}
+    .pending{background: rgba(251,191,36,0.14); color:#fde68a; border-color: rgba(251,191,36,0.65)}
+    .sold{background: rgba(248,113,113,0.14); color:#fecaca; border-color: rgba(248,113,113,0.65)}
+    .reqNew{background: rgba(248,113,113,0.14); color:#fee2e2; border-color: rgba(248,113,113,0.55)}
+    .reqBooked{background: rgba(34,197,94,0.14); color:#bbf7d0; border-color: rgba(34,197,94,0.55)}
+    .reqClosed{background: rgba(15,23,42,0.75); color:#fde68a; border-color: rgba(251,191,36,0.45)}
+
+    /* Toast */
+    #toast{
+      position:fixed; bottom:16px; right:16px; z-index:60;
+      padding:10px 14px; border-radius:999px; font-size:12px;
+      display:none; align-items:center; gap:8px;
+      background: rgba(15,23,42,0.98);
+      border:1px solid rgba(248,113,113,0.6);
+      color: var(--muted);
+      box-shadow: 0 16px 30px rgba(15,23,42,0.98), 0 0 26px rgba(248,113,113,0.35);
+    }
+    #toast.show{display:flex}
+    #toast.success{border-color: rgba(34,197,94,0.72); color:#bbf7d0}
+    #toast.error{border-color: rgba(248,113,113,0.9); color:#fecaca}
+    #toastDot{width:8px;height:8px;border-radius:999px;background:var(--accent)}
+    .statusline{min-height:18px; font-size:12px; color:var(--muted); margin-top:8px}
+    .statusline.error{color:var(--bad)}
+  </style>
 </head>
-<body style="font-family:system-ui;padding:24px">
-  <h1>Admin</h1>
-  <p>Env-driven login: <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code></p>
 
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <input id="u" placeholder="username" value="adminpytch" />
-    <input id="p" placeholder="password" value="123456" type="password" />
-    <button id="login">Login</button>
+<body>
+  <div class="wrap">
+    <!-- LOGIN -->
+    <div class="card" id="loginView">
+      <div class="top">
+        <div class="brand">
+          <div class="badge">A</div>
+          <div>
+            <div class="title">Admin Console</div>
+            <div class="sub">Manage dealers, inventory, and viewing requests.</div>
+          </div>
+        </div>
+        <div class="actions">
+          <a class="btn btn-ghost" href="/"><span>Storefront</span><span>←</span></a>
+          <a class="btn btn-ghost" href="/apps/dealer"><span>Dealer</span><span>↗</span></a>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Sign in (test)</h3>
+        <div class="hint">
+          Test credentials:
+          <span class="mono">adminpytch</span> /
+          <span class="mono">123456</span>
+        </div>
+
+        <div class="row two" style="margin-top:10px">
+          <div class="field">
+            <div class="label"><span>Username</span><span>Required</span></div>
+            <input id="username" class="input" placeholder="adminpytch" autocomplete="username" />
+          </div>
+          <div class="field">
+            <div class="label"><span>Password</span><span>Required</span></div>
+            <input id="password" class="input" type="password" placeholder="123456" autocomplete="current-password" />
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; margin-top:12px">
+          <button class="btn btn-ghost" id="btnDemo" type="button"><span>Demo</span><span>★</span></button>
+          <button class="btn btn-primary" id="btnLogin" type="button"><span>Sign in</span><span>→</span></button>
+        </div>
+
+        <div class="statusline" id="loginStatus"></div>
+      </div>
+    </div>
+
+    <!-- DASH -->
+    <div class="card hidden" id="dashView">
+      <div class="top">
+        <div class="brand">
+          <div class="badge">A</div>
+          <div>
+            <div class="title">Carsales SaaS</div>
+            <div class="sub" id="whoami">Admin</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <div class="pill">
+            <span class="dot" id="apiDot"></span>
+            <span id="apiStatus">Demo</span>
+          </div>
+          <div class="tabs" role="tablist" aria-label="Admin tabs">
+            <button class="tab active" id="tabDealers" data-tab="dealers" type="button">Dealers</button>
+            <button class="tab" id="tabInventory" data-tab="inventory" type="button">Inventory</button>
+            <button class="tab" id="tabRequests" data-tab="requests" type="button">Requests</button>
+          </div>
+          <button class="btn btn-ghost" id="btnRefresh" type="button"><span>Refresh</span><span>⟳</span></button>
+          <button class="btn btn-ghost" id="btnLogout" type="button"><span>Logout</span><span>⎋</span></button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3>Controls</h3>
+          <div class="hint">Search + filter across the current tab. (Demo data until backend is wired.)</div>
+
+          <div class="field">
+            <div class="label"><span>Search</span><span>Dealer / Vehicle / Customer</span></div>
+            <input id="q" class="input" placeholder="Search…" />
+          </div>
+
+          <div class="field" id="statusFilterWrap">
+            <div class="label"><span>Status filter</span><span>Contextual</span></div>
+            <select id="statusFilter" class="select">
+              <option value="">All</option>
+            </select>
+          </div>
+
+          <div class="statusline" id="dashStatus"></div>
+
+          <div class="panel" style="margin-top:10px">
+            <h3>Bucket</h3>
+            <div class="hint">
+              Media bucket: <span class="mono">samplemedia1</span><br/>
+              Uploads should be written by backend to:
+              <span class="mono">dealers/{dealerId}/vehicles/{vehicleId}/photos/</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <div class="table-head">
+            <div>
+              <div class="table-title" id="tableTitle">Dealers</div>
+              <div class="table-meta">Showing <span id="count">0</span> rows</div>
+            </div>
+            <div class="table-meta" id="lastUpdated">—</div>
+          </div>
+
+          <div class="scroll">
+            <table>
+              <thead>
+                <tr id="theadRow"></tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <hr />
-
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <input id="dealerId" placeholder="new dealerId" value="dealerpytch2" />
-    <input id="pin" placeholder="pin" value="123456" />
-    <input id="name" placeholder="name" value="Dealer Two" />
-    <button id="create">Create Dealer</button>
-    <button id="list">List Dealers</button>
+  <!-- Toast -->
+  <div id="toast">
+    <div id="toastDot"></div>
+    <div id="toastMsg"></div>
   </div>
-
-  <pre id="out" style="background:#111;color:#eee;padding:12px;border-radius:8px;overflow:auto;"></pre>
 
   <script>
-    let token = "";
+    /**
+     * ADMIN AUTH (DEMO)
+     * For demo speed, we validate locally:
+     *  - adminpytch / 123456
+     *
+     * REAL BUILD:
+     *  - Do NOT store passwords in HTML.
+     *  - Put auth in Cloud Run (server.js routes), use Secret Manager / DB.
+     */
 
-    const out = (x) => document.getElementById("out").textContent = JSON.stringify(x, null, 2);
-
-    document.getElementById("login").onclick = async () => {
-      const username = document.getElementById("u").value;
-      const password = document.getElementById("p").value;
-      const res = await fetch("/api/admin/login", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ username, password })
-      });
-      const data = await res.json();
-      token = data.token || "";
-      out(data);
+    const TEST_USERS = {
+      "adminpytch": { password: "123456", role: "admin" }
     };
 
-    document.getElementById("create").onclick = async () => {
-      const dealerId = document.getElementById("dealerId").value;
-      const pin = document.getElementById("pin").value;
-      const name = document.getElementById("name").value;
-      const res = await fetch("/api/admin/dealers", {
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json",
-          "Authorization":"Bearer " + token
-        },
-        body: JSON.stringify({ dealerId, pin, name })
-      });
-      out(await res.json());
+    const el = (id) => document.getElementById(id);
+
+    const ui = {
+      loginView: el("loginView"),
+      dashView: el("dashView"),
+      username: el("username"),
+      password: el("password"),
+      btnLogin: el("btnLogin"),
+      btnDemo: el("btnDemo"),
+      loginStatus: el("loginStatus"),
+
+      whoami: el("whoami"),
+      apiDot: el("apiDot"),
+      apiStatus: el("apiStatus"),
+      btnRefresh: el("btnRefresh"),
+      btnLogout: el("btnLogout"),
+
+      tabDealers: el("tabDealers"),
+      tabInventory: el("tabInventory"),
+      tabRequests: el("tabRequests"),
+
+      q: el("q"),
+      statusFilter: el("statusFilter"),
+      statusFilterWrap: el("statusFilterWrap"),
+
+      tableTitle: el("tableTitle"),
+      theadRow: el("theadRow"),
+      tbody: el("tbody"),
+      count: el("count"),
+      lastUpdated: el("lastUpdated"),
+      dashStatus: el("dashStatus"),
+
+      toast: el("toast"),
+      toastDot: el("toastDot"),
+      toastMsg: el("toastMsg"),
     };
 
-    document.getElementById("list").onclick = async () => {
-      const res = await fetch("/api/admin/dealers", {
-        headers:{ "Authorization":"Bearer " + token }
-      });
-      out(await res.json());
+    const state = {
+      tab: "dealers",
+      user: null,
+      dealers: [],
+      vehicles: [],
+      requests: []
     };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      wire();
+      // helpful prefill for your test run
+      ui.username.value = "adminpytch";
+      ui.password.value = "123456";
+    });
+
+    function wire(){
+      ui.btnLogin.addEventListener("click", doLogin);
+      ui.btnDemo.addEventListener("click", enterDemo);
+      ui.password.addEventListener("keydown", (e) => { if(e.key==="Enter") doLogin(); });
+
+      [ui.tabDealers, ui.tabInventory, ui.tabRequests].forEach(btn => {
+        btn.addEventListener("click", () => setTab(btn.dataset.tab));
+      });
+
+      ui.btnRefresh.addEventListener("click", refresh);
+      ui.btnLogout.addEventListener("click", logout);
+
+      ui.q.addEventListener("keydown", (e) => { if(e.key==="Enter") render(); });
+      ui.statusFilter.addEventListener("change", render);
+    }
+
+    function doLogin(){
+      const u = (ui.username.value||"").trim();
+      const p = (ui.password.value||"").trim();
+      if(!u || !p) return setLoginStatus("Enter username + password.", true);
+
+      const rec = TEST_USERS[u];
+      if(!rec || rec.password !== p){
+        setLoginStatus("Invalid credentials. Use adminpytch / 123456.", true);
+        return;
+      }
+
+      state.user = { username:u, role: rec.role };
+      ui.apiStatus.textContent = "Demo";
+      setDot("warn");
+      enterDashboard();
+    }
+
+    function enterDemo(){
+      state.user = { username:"adminpytch", role:"admin" };
+      ui.apiStatus.textContent = "Demo";
+      setDot("warn");
+      enterDashboard();
+    }
+
+    function enterDashboard(){
+      ui.loginView.classList.add("hidden");
+      ui.dashView.classList.remove("hidden");
+      ui.whoami.textContent = `Admin · ${state.user.username}`;
+      seedDemoData();
+      setTab("dealers");
+      refresh();
+      toast("Signed in.", "success");
+    }
+
+    function logout(){
+      state.user = null;
+      ui.dashView.classList.add("hidden");
+      ui.loginView.classList.remove("hidden");
+      ui.loginStatus.textContent = "";
+      toast("Logged out.", "success");
+    }
+
+    function refresh(){
+      ui.dashStatus.textContent = "Loading… (demo)";
+      ui.lastUpdated.textContent = "Updated: " + fmt(new Date());
+      ui.dashStatus.textContent = "Ready.";
+      render();
+    }
+
+    function setTab(tab){
+      state.tab = tab;
+
+      ui.tabDealers.classList.toggle("active", tab==="dealers");
+      ui.tabInventory.classList.toggle("active", tab==="inventory");
+      ui.tabRequests.classList.toggle("active", tab==="requests");
+
+      ui.tableTitle.textContent = tab === "dealers" ? "Dealers"
+        : tab === "inventory" ? "Inventory"
+        : "Viewing requests";
+
+      buildStatusFilterOptions(tab);
+      buildTableHeaders(tab);
+      render();
+    }
+
+    function buildStatusFilterOptions(tab){
+      ui.statusFilter.innerHTML = "";
+      const add = (v, t) => {
+        const o = document.createElement("option");
+        o.value = v; o.textContent = t;
+        ui.statusFilter.appendChild(o);
+      };
+
+      add("", "All");
+
+      if(tab === "dealers"){
+        add("active", "Active");
+        add("paused", "Paused");
+      } else if(tab === "inventory"){
+        add("available", "Available");
+        add("pending", "Pending");
+        add("sold", "Sold");
+      } else {
+        add("new", "New");
+        add("booked", "Booked");
+        add("closed", "Closed");
+      }
+
+      ui.statusFilterWrap.classList.remove("hidden");
+    }
+
+    function buildTableHeaders(tab){
+      ui.theadRow.innerHTML = "";
+
+      const cols = tab === "dealers"
+        ? ["Dealer", "Dealer ID", "Status", "Vehicles", "Last activity"]
+        : tab === "inventory"
+          ? ["Vehicle", "Dealer", "Status", "Price", "Updated"]
+          : ["Customer", "Vehicle", "Dealer", "Status", "Requested"];
+
+      cols.forEach(c => {
+        const th = document.createElement("th");
+        th.textContent = c;
+        ui.theadRow.appendChild(th);
+      });
+    }
+
+    function render(){
+      const q = (ui.q.value||"").trim().toLowerCase();
+      const f = (ui.statusFilter.value||"").trim().toLowerCase();
+
+      let rows = [];
+      if(state.tab === "dealers") rows = [...state.dealers];
+      if(state.tab === "inventory") rows = [...state.vehicles];
+      if(state.tab === "requests") rows = [...state.requests];
+
+      if(q){
+        rows = rows.filter(r => JSON.stringify(r).toLowerCase().includes(q));
+      }
+      if(f){
+        rows = rows.filter(r => (r.status||"").toLowerCase() === f);
+      }
+
+      ui.tbody.innerHTML = "";
+      ui.count.textContent = String(rows.length);
+
+      if(!rows.length){
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 5;
+        td.style.color = "var(--muted)";
+        td.style.padding = "14px";
+        td.textContent = "No rows match your filters.";
+        tr.appendChild(td);
+        ui.tbody.appendChild(tr);
+        return;
+      }
+
+      rows.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.style.cursor = "default";
+
+        if(state.tab === "dealers"){
+          tr.appendChild(td(`${esc(r.name)}`));
+          tr.appendChild(td(`<span class="mono">${esc(r.dealerId)}</span>`));
+          tr.appendChild(td(statusPill(r.status)));
+          tr.appendChild(td(`<span class="badgeMini">${r.vehicleCount} vehicles</span>`));
+          tr.appendChild(td(`<span class="mono">${esc(r.lastActivity)}</span>`));
+        }
+
+        if(state.tab === "inventory"){
+          tr.appendChild(td(`<div class="mono">${esc(r.vehicleId)}</div><div style="color:var(--muted);font-size:11px;margin-top:2px">${esc(r.make)} ${esc(r.model)}</div>`));
+          tr.appendChild(td(`<span class="badgeMini">${esc(r.dealerId)}</span>`));
+          tr.appendChild(td(statusPill(r.status)));
+          tr.appendChild(td(`<div style="font-weight:800">${money(r.price)}</div>`));
+          tr.appendChild(td(`<span class="mono">${esc(r.updated)}</span>`));
+        }
+
+        if(state.tab === "requests"){
+          tr.appendChild(td(`<div style="font-weight:800">${esc(r.customer)}</div><div style="color:var(--muted);font-size:11px;margin-top:2px">${esc(r.phone)}</div>`));
+          tr.appendChild(td(`<div class="mono">${esc(r.vehicleId)}</div>`));
+          tr.appendChild(td(`<span class="badgeMini">${esc(r.dealerId)}</span>`));
+          tr.appendChild(td(requestPill(r.status)));
+          tr.appendChild(td(`<span class="mono">${esc(r.requested)}</span>`));
+        }
+
+        ui.tbody.appendChild(tr);
+      });
+    }
+
+    function td(html){
+      const td = document.createElement("td");
+      td.innerHTML = html;
+      return td;
+    }
+
+    function statusPill(s){
+      const v = (s||"").toLowerCase();
+      const cls = v === "available" ? "available" : v === "pending" ? "pending" : v === "sold" ? "sold" : "pending";
+      return `<span class="status ${cls}">${esc(v||"—")}</span>`;
+    }
+    function requestPill(s){
+      const v = (s||"").toLowerCase();
+      const cls = v === "new" ? "reqNew" : v === "booked" ? "reqBooked" : "reqClosed";
+      return `<span class="status ${cls}">${esc(v||"—")}</span>`;
+    }
+
+    function seedDemoData(){
+      state.dealers = [
+        { name:"Pytch Motors", dealerId:"DEALER-0001", status:"active", vehicleCount: 12, lastActivity: fmt(new Date(Date.now()-3600*1000*3)) },
+        { name:"Island Auto", dealerId:"DEALER-0002", status:"active", vehicleCount: 7, lastActivity: fmt(new Date(Date.now()-3600*1000*26)) },
+        { name:"Mobay Cars", dealerId:"DEALER-0003", status:"paused", vehicleCount: 3, lastActivity: fmt(new Date(Date.now()-3600*1000*80)) },
+      ];
+
+      state.vehicles = [
+        { vehicleId:"VEH-10021", dealerId:"DEALER-0001", make:"Toyota", model:"Vitz", status:"available", price:1250000, updated: fmt(new Date(Date.now()-3600*1000*8)) },
+        { vehicleId:"VEH-10022", dealerId:"DEALER-0001", make:"Honda", model:"Civic", status:"pending", price:2200000, updated: fmt(new Date(Date.now()-3600*1000*19)) },
+        { vehicleId:"VEH-10031", dealerId:"DEALER-0002", make:"Nissan", model:"Note", status:"available", price:1450000, updated: fmt(new Date(Date.now()-3600*1000*5)) },
+        { vehicleId:"VEH-10041", dealerId:"DEALER-0003", make:"BMW", model:"3 Series", status:"sold", price:3950000, updated: fmt(new Date(Date.now()-3600*1000*66)) },
+      ];
+
+      state.requests = [
+        { customer:"Andre W.", phone:"876-555-0192", vehicleId:"VEH-10022", dealerId:"DEALER-0001", status:"new", requested: fmt(new Date(Date.now()-3600*1000*2)) },
+        { customer:"Kiera M.", phone:"876-555-0113", vehicleId:"VEH-10021", dealerId:"DEALER-0001", status:"booked", requested: fmt(new Date(Date.now()-3600*1000*10)) },
+        { customer:"Damien R.", phone:"876-555-0177", vehicleId:"VEH-10031", dealerId:"DEALER-0002", status:"closed", requested: fmt(new Date(Date.now()-3600*1000*30)) },
+      ];
+    }
+
+    function setDot(mode){
+      ui.apiDot.classList.remove("on","err");
+      if(mode==="on") ui.apiDot.classList.add("on");
+      if(mode==="err") ui.apiDot.classList.add("err");
+    }
+
+    function setLoginStatus(msg, err){
+      ui.loginStatus.textContent = msg || "";
+      ui.loginStatus.classList.toggle("error", !!err);
+    }
+
+    function toast(message, type){
+      ui.toastMsg.textContent = message || "";
+      ui.toast.classList.remove("success","error");
+      if(type==="success"){ ui.toast.classList.add("success"); ui.toastDot.style.background="#22c55e"; }
+      else if(type==="error"){ ui.toast.classList.add("error"); ui.toastDot.style.background="#f97373"; }
+      else ui.toastDot.style.background="var(--accent)";
+      ui.toast.classList.add("show");
+      clearTimeout(window.__t);
+      window.__t = setTimeout(()=>ui.toast.classList.remove("show"), 3200);
+    }
+
+    function money(n){
+      const v = Number(n);
+      if(!Number.isFinite(v) || v<=0) return "—";
+      return "JMD " + v.toLocaleString(undefined,{maximumFractionDigits:0});
+    }
+    function fmt(d){
+      const dt = (d instanceof Date)?d:new Date(d);
+      const day = String(dt.getDate()).padStart(2,"0");
+      const mon = String(dt.getMonth()+1).padStart(2,"0");
+      const yr = String(dt.getFullYear()).slice(-2);
+      const hr = String(dt.getHours()).padStart(2,"0");
+      const mi = String(dt.getMinutes()).padStart(2,"0");
+      return `${day}/${mon}/${yr} ${hr}:${mi}`;
+    }
+    function esc(s){
+      return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+    }
   </script>
 </body>
 </html>
