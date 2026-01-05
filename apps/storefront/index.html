@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Carsales — Live Inventory</title>
+
+  <style>
+    :root{
+      --bg:#050308;
+      --bg2:#0a0610;
+      --card:rgba(15,23,42,0.92);
+      --ink:#fff7f7;
+      --muted:#fecaca;
+      --accent:#f97373;
+      --accent2:#ef4444;
+      --border:rgba(248,113,113,0.35);
+      --shadow:0 22px 46px rgba(15,23,42,0.95);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+      background: radial-gradient(circle at top left, #7f1d1d 0, #020617 40%, #020617 100%);
+      color:var(--ink);
+      -webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit}
+    .wrap{min-height:100vh;padding:18px;display:flex;justify-content:center}
+    .shell{width:100%;max-width:1240px;display:flex;flex-direction:column;gap:12px}
+
+    .topbar{
+      display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;
+      padding:16px 16px;
+      border:1px solid var(--border);
+      border-radius:24px;
+      background:
+        linear-gradient(145deg, rgba(248,250,252,0.085), rgba(10,6,16,0.98)),
+        radial-gradient(circle at top left, rgba(248,113,113,0.18), transparent 55%);
+      box-shadow:var(--shadow), 0 0 42px rgba(248,113,113,0.22);
+      backdrop-filter: blur(18px);
+    }
+    .brand{display:flex;gap:10px;align-items:center}
+    .badge{
+      width:44px;height:44px;border-radius:40%;
+      background:radial-gradient(circle at 30% 0, #fee2e2, #f97373 45%, #7f1d1d 100%);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:900;color:#fff;font-size:20px;
+      box-shadow:0 0 0 1px rgba(248,113,113,0.9), 0 14px 28px rgba(248,113,113,0.55);
+    }
+    .brand h1{margin:0;font-size:18px;font-weight:650;letter-spacing:.02em}
+    .brand .sub{font-size:12px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+    .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      border-radius:999px;padding:6px 10px;
+      border:1px solid rgba(248,113,113,0.55);
+      background:rgba(15,23,42,0.8);
+      color:rgba(254,202,202,0.95);
+      font-size:12px;
+      box-shadow:0 10px 20px rgba(15,23,42,0.9);
+    }
+    .dot{width:8px;height:8px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,0.35)}
+    .btn{
+      border:none;cursor:pointer;
+      border-radius:999px;
+      padding:9px 14px;
+      font-size:12px;font-weight:600;
+      color:#fff;
+      background: radial-gradient(circle at top left, #f97373, #ef4444 45%, #991b1b 100%);
+      box-shadow:0 16px 32px rgba(127,29,29,0.8), 0 0 40px rgba(248,113,113,0.4);
+      transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      display:inline-flex;align-items:center;gap:8px;
+    }
+    .btn:hover{transform:translateY(-1px);filter:brightness(1.02)}
+    .btn:active{transform:translateY(0);filter:brightness(.98)}
+    .btn-ghost{
+      background:rgba(15,23,42,0.75);
+      border:1px solid rgba(248,113,113,0.35);
+      color:rgba(254,202,202,0.95);
+      box-shadow:0 10px 22px rgba(15,23,42,0.9);
+    }
+
+    .filters{
+      display:flex;flex-wrap:wrap;gap:10px;
+      padding:12px 12px;
+      border-radius:999px;
+      border:1px solid rgba(248,113,113,0.35);
+      background:linear-gradient(135deg, rgba(15,23,42,0.92), rgba(24,9,16,0.98));
+      box-shadow:0 10px 24px rgba(15,23,42,0.95);
+    }
+    .fg{display:flex;align-items:center;gap:8px;flex:1 1 160px;min-width:0}
+    .lbl{font-size:11px;color:var(--muted);white-space:nowrap}
+    .input,.select{
+      width:100%;
+      border-radius:999px;
+      border:1px solid rgba(248,113,113,0.35);
+      background:rgba(15,23,42,0.85);
+      padding:8px 12px;
+      font-size:12px;color:var(--ink);
+      outline:none;
+    }
+    .input:focus,.select:focus{
+      border-color:var(--accent2);
+      box-shadow:0 0 0 1px rgba(248,113,113,0.6), 0 0 22px rgba(248,113,113,0.35);
+      background:#020617;
+    }
+
+    .kpis{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+      gap:10px;
+    }
+    .kpi{
+      border-radius:20px;
+      border:1px solid rgba(248,113,113,0.42);
+      background: radial-gradient(circle at top, rgba(248,113,113,0.12), transparent 65%), rgba(15,23,42,0.96);
+      box-shadow:0 14px 26px rgba(15,23,42,0.95);
+      padding:10px 12px;
+      display:flex;flex-direction:column;gap:2px;
+    }
+    .kpi .t{font-size:11px;color:var(--muted)}
+    .kpi .v{font-size:18px;font-weight:700}
+    .kpi .s{font-size:11px;color:rgba(254,202,202,0.9)}
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:12px;
+    }
+    .card{
+      border-radius:22px;
+      border:1px solid rgba(248,113,113,0.45);
+      background:
+        radial-gradient(circle at top left, rgba(248,113,113,0.16), transparent 60%),
+        rgba(15,23,42,0.98);
+      box-shadow:0 18px 32px rgba(15,23,42,0.98), 0 0 34px rgba(248,113,113,0.18);
+      overflow:hidden;
+      display:flex;flex-direction:column;
+      min-height: 330px;
+    }
+    .media{
+      height:160px;
+      background:
+        linear-gradient(145deg, rgba(248,250,252,0.08), rgba(10,6,16,0.95)),
+        radial-gradient(circle at 25% 0, rgba(248,113,113,0.22), transparent 55%);
+      display:flex;align-items:center;justify-content:center;
+      color:rgba(254,202,202,0.9);
+      font-size:12px;
+      border-bottom:1px solid rgba(248,113,113,0.28);
+      position:relative;
+    }
+    .tag{
+      position:absolute;top:10px;left:10px;
+      font-size:10px;
+      border-radius:999px;padding:3px 8px;
+      border:1px solid rgba(248,113,113,0.6);
+      background:rgba(15,23,42,0.8);
+      color:#fee2e2;
+    }
+    .content{padding:12px 12px 12px;display:flex;flex-direction:column;gap:8px;flex:1}
+    .title{font-size:14px;font-weight:700;line-height:1.2}
+    .meta{font-size:12px;color:rgba(254,202,202,0.9)}
+    .priceRow{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;margin-top:4px}
+    .price{font-size:16px;font-weight:800}
+    .status{
+      font-size:10px;border-radius:999px;padding:2px 8px;
+      border:1px solid rgba(251,191,36,0.65);
+      color:#fde68a;background:rgba(248,250,252,0.04);
+      text-transform:uppercase;letter-spacing:.06em;
+    }
+    .status.published{
+      border-color:rgba(34,197,94,0.7);
+      color:#bbf7d0;background:rgba(34,197,94,0.14);
+    }
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+    .btn-sm{padding:8px 12px;font-size:12px}
+    .btn-outline{background:rgba(15,23,42,0.8);border:1px solid rgba(248,113,113,0.35);color:#fee2e2}
+
+    .empty{
+      border-radius:22px;
+      border:1px solid rgba(248,113,113,0.35);
+      background:rgba(15,23,42,0.85);
+      padding:18px;
+      color:rgba(254,202,202,0.9);
+      text-align:center;
+    }
+
+    /* Modal */
+    .backdrop{
+      position:fixed;inset:0;
+      background:rgba(15,23,42,0.88);
+      backdrop-filter: blur(12px);
+      display:none;
+      align-items:center;justify-content:center;
+      padding:16px;
+      z-index:50;
+    }
+    .modal{
+      width:100%;max-width:620px;
+      border-radius:26px;
+      border:1px solid rgba(248,113,113,0.5);
+      background:
+        radial-gradient(circle at top left, rgba(248,113,113,0.2), transparent 50%),
+        rgba(10,6,16,0.98);
+      box-shadow:0 24px 50px rgba(15,23,42,0.98), 0 0 40px rgba(248,113,113,0.35);
+      padding:16px 18px 14px;
+    }
+    .mh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px}
+    .mh h2{margin:0;font-size:15px;font-weight:800}
+    .mh p{margin:4px 0 0;font-size:12px;color:rgba(254,202,202,0.9)}
+    .x{
+      border:none;background:transparent;color:rgba(254,202,202,0.9);
+      font-size:22px;cursor:pointer;line-height:1;padding:2px 8px;border-radius:999px;
+    }
+    .x:hover{background:rgba(248,113,113,0.12);color:#fff}
+    .mg{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+      gap:10px 14px;
+    }
+    .ta{
+      width:100%;border-radius:18px;border:1px solid rgba(248,113,113,0.35);
+      background:rgba(15,23,42,0.85);
+      padding:9px 12px;font-size:13px;color:var(--ink);
+      outline:none;resize:vertical;min-height:70px;
+    }
+    .foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+    .note{font-size:11px;color:rgba(254,202,202,0.85)}
+    .toast{
+      position:fixed;right:16px;bottom:16px;
+      display:none;gap:8px;align-items:center;
+      padding:10px 14px;border-radius:999px;
+      border:1px solid rgba(248,113,113,0.6);
+      background:rgba(15,23,42,0.96);
+      box-shadow:0 16px 30px rgba(15,23,42,0.98);
+      color:rgba(254,202,202,0.95);
+      z-index:60;
+      font-size:12px;
+    }
+    .toast.ok{border-color:rgba(34,197,94,0.7);color:#bbf7d0}
+    .toast .d{width:8px;height:8px;border-radius:999px;background:#f97373}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="shell">
+
+      <header class="topbar">
+        <div class="brand">
+          <div class="badge">C</div>
+          <div>
+            <h1 id="storeTitle">Live Inventory</h1>
+            <div class="sub" id="storeSub">Browse what’s in stock. Book a viewing in seconds.</div>
+          </div>
+        </div>
+
+        <div class="right">
+          <div class="pill" title="Inventory updates in real time">
+            <span class="dot"></span>
+            <span id="dealerPill">Dealer: All</span>
+          </div>
+          <button class="btn btn-ghost" id="btnRefresh" type="button">Refresh</button>
+        </div>
+      </header>
+
+      <section class="filters">
+        <div class="fg">
+          <div class="lbl">Dealer ID</div>
+          <input class="input" id="fDealer" placeholder="Optional (e.g. dealerpytch)" />
+        </div>
+
+        <div class="fg">
+          <div class="lbl">Search</div>
+          <input class="input" id="fSearch" placeholder="Make, model, title, notes…" />
+        </div>
+
+        <div class="fg">
+          <div class="lbl">Make</div>
+          <select class="select" id="fMake">
+            <option value="">All</option>
+          </select>
+        </div>
+
+        <div class="fg">
+          <div class="lbl">Model</div>
+          <select class="select" id="fModel">
+            <option value="">All</option>
+          </select>
+        </div>
+
+        <div class="fg">
+          <div class="lbl">Year</div>
+          <select class="select" id="fYear">
+            <option value="">All</option>
+          </select>
+        </div>
+
+        <div class="fg">
+          <div class="lbl">Sort</div>
+          <select class="select" id="fSort">
+            <option value="newest">Newest</option>
+            <option value="price_asc">Price: Low → High</option>
+            <option value="price_desc">Price: High → Low</option>
+            <option value="year_desc">Year: Newest</option>
+            <option value="year_asc">Year: Oldest</option>
+          </select>
+        </div>
+
+        <div class="fg" style="flex:0 0 auto">
+          <button class="btn btn-ghost btn-sm" id="btnClear" type="button">Clear</button>
+        </div>
+        <div class="fg" style="flex:0 0 auto">
+          <button class="btn btn-sm" id="btnApply" type="button">Apply</button>
+        </div>
+      </section>
+
+      <section class="kpis">
+        <div class="kpi">
+          <div class="t">Vehicles in view</div>
+          <div class="v" id="kTotal">–</div>
+          <div class="s">Matches your filters</div>
+        </div>
+        <div class="kpi">
+          <div class="t">Most common make</div>
+          <div class="v" id="kMake">–</div>
+          <div class="s">Based on current results</div>
+        </div>
+        <div class="kpi">
+          <div class="t">Price range</div>
+          <div class="v" id="kRange">–</div>
+          <div class="s">Min → Max</div>
+        </div>
+        <div class="kpi">
+          <div class="t">Fast action tip</div>
+          <div class="v" style="font-size:13px;font-weight:750" id="kTip">–</div>
+          <div class="s">Suggested next step</div>
+        </div>
+      </section>
+
+      <section>
+        <div id="grid" class="grid"></div>
+        <div id="empty" class="empty" style="display:none">
+          No vehicles match your filters yet. Try clearing filters or refreshing.
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div id="backdrop" class="backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="mh">
+        <div>
+          <h2 id="mTitle">Book a viewing</h2>
+          <p id="mSub">Tell us how you’d like to view this vehicle. We’ll confirm quickly.</p>
+        </div>
+        <button class="x" id="mClose" type="button" aria-label="Close">×</button>
+      </div>
+
+      <div class="mg">
+        <div>
+          <div class="lbl">Your name</div>
+          <input class="input" id="mName" placeholder="Full name" />
+        </div>
+        <div>
+          <div class="lbl">Phone</div>
+          <input class="input" id="mPhone" placeholder="876-XXX-XXXX" />
+        </div>
+        <div>
+          <div class="lbl">Email (optional)</div>
+          <input class="input" id="mEmail" placeholder="you@example.com" />
+        </div>
+        <div>
+          <div class="lbl">Preferred date</div>
+          <input class="input" id="mDate" type="date" />
+        </div>
+        <div>
+          <div class="lbl">Preferred time</div>
+          <input class="input" id="mTime" type="time" />
+        </div>
+        <div>
+          <div class="lbl">Viewing type</div>
+          <select class="select" id="mType">
+            <option value="video">Video viewing (quick walkthrough)</option>
+            <option value="in_person">Live / in-person viewing</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <div class="lbl">What should we focus on?</div>
+        <textarea class="ta" id="mNotes" placeholder="Example: engine sound, AC, trunk space, financing options, trade-in, etc."></textarea>
+      </div>
+
+      <div class="foot">
+        <div class="note" id="mHint">
+          We’ll use your details only to confirm this viewing request.
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" id="mCancel" type="button">Cancel</button>
+          <button class="btn btn-sm" id="mSubmit" type="button">Send request</button>
+        </div>
+      </div>
+
+      <div class="note" id="mStatus" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"><div class="d"></div><div id="toastMsg"></div></div>
+
+  <script>
+    // --------- State ----------
+    let allVehicles = [];
+    let filtered = [];
+
+    let booking = {
+      dealerId: "",
+      vehicleId: "",
+      title: ""
+    };
+
+    // --------- Helpers ----------
+    function qs(id){ return document.getElementById(id); }
+    function money(n){
+      const x = Number(n || 0);
+      if (!isFinite(x)) return "—";
+      return "J$ " + x.toLocaleString();
+    }
+    function norm(s){ return String(s || "").trim().toLowerCase(); }
+    function showToast(msg, ok=true){
+      const t = qs("toast");
+      const d = t.querySelector(".d");
+      qs("toastMsg").textContent = msg;
+      t.classList.toggle("ok", !!ok);
+      d.style.background = ok ? "#22c55e" : "#f97373";
+      t.style.display = "flex";
+      setTimeout(()=> t.style.display="none", 3200);
+    }
+
+    function parseDealerFromUrl(){
+      const u = new URL(location.href);
+      const d = u.searchParams.get("dealerId") || "";
+      if (d) qs("fDealer").value = d;
+    }
+
+    // --------- Fetch inventory ----------
+    async function loadInventory(){
+      const dealerId = qs("fDealer").value.trim();
+      qs("dealerPill").textContent = "Dealer: " + (dealerId || "All");
+
+      const url = new URL("/api/public/vehicles", location.origin);
+      if (dealerId) url.searchParams.set("dealerId", dealerId);
+
+      try{
+        const res = await fetch(url.toString());
+        const data = await res.json();
+        allVehicles = (data && data.vehicles) ? data.vehicles : [];
+        buildFilterOptions(allVehicles);
+        applyFilters();
+      }catch(e){
+        allVehicles = [];
+        render([]);
+        showToast("Could not load inventory. Try refresh.", false);
+      }
+    }
+
+    function buildFilterOptions(list){
+      const makes = new Set();
+      const models = new Set();
+      const years = new Set();
+
+      list.forEach(v=>{
+        if (v.make) makes.add(String(v.make));
+        if (v.model) models.add(String(v.model));
+        if (v.year) years.add(String(v.year));
+      });
+
+      fillSelect("fMake", makes);
+      fillSelect("fModel", models);
+      fillSelect("fYear", years, true);
+    }
+
+    function fillSelect(id, set, numeric=false){
+      const sel = qs(id);
+      const current = sel.value;
+      const first = sel.options[0].value;
+
+      const arr = Array.from(set);
+      arr.sort((a,b)=>{
+        if (numeric) return Number(a)-Number(b);
+        return a.localeCompare(b);
+      });
+
+      sel.innerHTML = "";
+      const opt0 = document.createElement("option");
+      opt0.value = first;
+      opt0.textContent = "All";
+      sel.appendChild(opt0);
+
+      arr.forEach(v=>{
+        const o = document.createElement("option");
+        o.value = v;
+        o.textContent = v;
+        sel.appendChild(o);
+      });
+
+      // restore if still valid
+      const exists = Array.from(sel.options).some(o=>o.value===current);
+      if (exists) sel.value = current;
+    }
+
+    // --------- Filters / Sort ----------
+    function applyFilters(){
+      const q = norm(qs("fSearch").value);
+      const make = qs("fMake").value;
+      const model = qs("fModel").value;
+      const year = qs("fYear").value;
+      const sort = qs("fSort").value;
+
+      filtered = allVehicles.filter(v=>{
+        const text = norm([v.title, v.make, v.model, v.notes].join(" "));
+        if (q && !text.includes(q)) return false;
+        if (make && String(v.make||"") !== make) return false;
+        if (model && String(v.model||"") !== model) return false;
+        if (year && String(v.year||"") !== year) return false;
+        return true;
+      });
+
+      // sort
+      const byDate = (a,b)=> (new Date(b.updatedAt||b.createdAt||0)) - (new Date(a.updatedAt||a.createdAt||0));
+      const byPriceAsc = (a,b)=> (Number(a.price||0) - Number(b.price||0));
+      const byPriceDesc = (a,b)=> (Number(b.price||0) - Number(a.price||0));
+      const byYearAsc = (a,b)=> (Number(a.year||0) - Number(b.year||0));
+      const byYearDesc = (a,b)=> (Number(b.year||0) - Number(a.year||0));
+
+      if (sort==="price_asc") filtered.sort(byPriceAsc);
+      else if (sort==="price_desc") filtered.sort(byPriceDesc);
+      else if (sort==="year_asc") filtered.sort(byYearAsc);
+      else if (sort==="year_desc") filtered.sort(byYearDesc);
+      else filtered.sort(byDate);
+
+      render(filtered);
+      updateKpis(filtered);
+    }
+
+    function updateKpis(list){
+      qs("kTotal").textContent = String(list.length);
+
+      // most common make
+      const counts = {};
+      list.forEach(v=>{
+        const m = String(v.make||"").trim();
+        if (!m) return;
+        counts[m] = (counts[m]||0)+1;
+      });
+      let top = "—", topN = 0;
+      Object.keys(counts).forEach(k=>{
+        if (counts[k] > topN){ topN=counts[k]; top=k; }
+      });
+      qs("kMake").textContent = top;
+
+      // price range
+      const prices = list.map(v=>Number(v.price||0)).filter(n=>isFinite(n) && n>0);
+      if (!prices.length) qs("kRange").textContent = "—";
+      else {
+        const min = Math.min(...prices), max = Math.max(...prices);
+        qs("kRange").textContent = `${money(min)} → ${money(max)}`;
+      }
+
+      // suggestive copy
+      if (!list.length) qs("kTip").textContent = "Try searching by make or clearing filters.";
+      else qs("kTip").textContent = "See something you like? Tap “Video viewing” for a quick walkthrough.";
+    }
+
+    // --------- Render cards ----------
+    function render(list){
+      const grid = qs("grid");
+      grid.innerHTML = "";
+
+      qs("empty").style.display = list.length ? "none" : "block";
+
+      list.forEach(v=>{
+        const title = v.title || [v.year, v.make, v.model].filter(Boolean).join(" ") || "Vehicle";
+        const dealerId = v.dealerId || "unknown";
+        const vehicleId = v.vehicleId || "unknown";
+        const status = String(v.status||"").toLowerCase();
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const media = document.createElement("div");
+        media.className = "media";
+
+        // If you later store publicUrl(s) in v.media.images/videos, show a hero image here.
+        // For now: placeholder + hint
+        const tag = document.createElement("div");
+        tag.className = "tag";
+        tag.textContent = dealerId;
+
+        media.appendChild(tag);
+        media.appendChild(document.createTextNode("Photo gallery will appear here"));
+
+        const c = document.createElement("div");
+        c.className = "content";
+
+        const t = document.createElement("div");
+        t.className = "title";
+        t.textContent = title;
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent = [v.year, v.make, v.model].filter(Boolean).join(" · ") || "Details available on request";
+
+        const pr = document.createElement("div");
+        pr.className = "priceRow";
+
+        const price = document.createElement("div");
+        price.className = "price";
+        price.textContent = v.price ? money(v.price) : "Price on request";
+
+        const st = document.createElement("div");
+        st.className = "status " + (status==="published" ? "published" : "");
+        st.textContent = status==="published" ? "IN STOCK" : (v.status || "Draft");
+
+        pr.appendChild(price);
+        pr.appendChild(st);
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const b1 = document.createElement("button");
+        b1.className = "btn btn-sm";
+        b1.type = "button";
+        b1.textContent = "Book video viewing";
+        b1.onclick = ()=> openBooking("video", dealerId, vehicleId, title);
+
+        const b2 = document.createElement("button");
+        b2.className = "btn btn-outline btn-sm";
+        b2.type = "button";
+        b2.textContent = "Book live viewing";
+        b2.onclick = ()=> openBooking("in_person", dealerId, vehicleId, title);
+
+        const b3 = document.createElement("button");
+        b3.className = "btn btn-ghost btn-sm";
+        b3.type = "button";
+        b3.textContent = "Copy vehicle link";
+        b3.onclick = async ()=>{
+          const u = new URL(location.href);
+          u.searchParams.set("dealerId", dealerId);
+          u.searchParams.set("vehicleId", vehicleId);
+          await navigator.clipboard.writeText(u.toString());
+          showToast("Link copied.");
+        };
+
+        actions.appendChild(b1);
+        actions.appendChild(b2);
+        actions.appendChild(b3);
+
+        c.appendChild(t);
+        c.appendChild(meta);
+        c.appendChild(pr);
+        c.appendChild(actions);
+
+        card.appendChild(media);
+        card.appendChild(c);
+
+        grid.appendChild(card);
+      });
+    }
+
+    // --------- Booking funnel ----------
+    function openBooking(type, dealerId, vehicleId, title){
+      booking = { dealerId, vehicleId, title };
+      qs("mType").value = type;
+      qs("mTitle").textContent = type==="video" ? "Book a video viewing" : "Book a live viewing";
+      qs("mSub").textContent =
+        type==="video"
+          ? "Get a quick walkthrough—ideal if you’re short on time."
+          : "Visit in person and inspect everything comfortably.";
+      qs("mStatus").textContent = "";
+      qs("backdrop").style.display = "flex";
+      qs("backdrop").setAttribute("aria-hidden","false");
+    }
+
+    function closeBooking(){
+      qs("backdrop").style.display = "none";
+      qs("backdrop").setAttribute("aria-hidden","true");
+    }
+
+    async function submitBooking(){
+      const payload = {
+        dealerId: booking.dealerId,
+        vehicleId: booking.vehicleId,
+        vehicleTitle: booking.title,
+        type: qs("mType").value,
+        name: qs("mName").value.trim(),
+        phone: qs("mPhone").value.trim(),
+        email: qs("mEmail").value.trim(),
+        preferredDate: qs("mDate").value || "",
+        preferredTime: qs("mTime").value || "",
+        notes: qs("mNotes").value.trim(),
+        source: "storefront"
+      };
+
+      if (!payload.name || !payload.phone){
+        qs("mStatus").textContent = "Please enter your name and phone number.";
+        return;
+      }
+
+      qs("mStatus").textContent = "Sending request…";
+
+      try{
+        // IMPORTANT:
+        // This expects a server endpoint: POST /api/public/leads
+        // If you don't have it yet, this will fail — but we’ll add it next.
+        const res = await fetch("/api/public/leads", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (!res.ok){
+          qs("mStatus").textContent = data?.error || "Could not send request.";
+          showToast("Request not sent.", false);
+          return;
+        }
+
+        qs("mStatus").textContent = "Request sent. We’ll confirm shortly.";
+        showToast("Viewing request sent.");
+        setTimeout(closeBooking, 600);
+      }catch(e){
+        qs("mStatus").textContent = "Could not send request. Please try again.";
+        showToast("Request not sent.", false);
+      }
+    }
+
+    // --------- Wire UI ----------
+    qs("btnRefresh").onclick = loadInventory;
+    qs("btnApply").onclick = applyFilters;
+
+    qs("btnClear").onclick = ()=>{
+      qs("fSearch").value = "";
+      qs("fMake").value = "";
+      qs("fModel").value = "";
+      qs("fYear").value = "";
+      qs("fSort").value = "newest";
+      applyFilters();
+    };
+
+    qs("fSearch").addEventListener("keydown", (e)=>{ if(e.key==="Enter") applyFilters(); });
+    qs("fMake").onchange = applyFilters;
+    qs("fModel").onchange = applyFilters;
+    qs("fYear").onchange = applyFilters;
+    qs("fSort").onchange = applyFilters;
+
+    qs("mClose").onclick = closeBooking;
+    qs("mCancel").onclick = closeBooking;
+    qs("backdrop").addEventListener("click",(e)=>{ if(e.target.id==="backdrop") closeBooking(); });
+    qs("mSubmit").onclick = submitBooking;
+
+    // Boot
+    parseDealerFromUrl();
+    loadInventory();
+  </script>
+</body>
+</html>
