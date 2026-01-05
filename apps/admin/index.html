@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Carsales SaaS — Admin</title>
+</head>
+<body style="font-family:system-ui;padding:24px">
+  <h1>Admin</h1>
+  <p>Env-driven login: <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code></p>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <input id="u" placeholder="username" value="adminpytch" />
+    <input id="p" placeholder="password" value="123456" type="password" />
+    <button id="login">Login</button>
+  </div>
+
+  <hr />
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <input id="dealerId" placeholder="new dealerId" value="dealerpytch2" />
+    <input id="pin" placeholder="pin" value="123456" />
+    <input id="name" placeholder="name" value="Dealer Two" />
+    <button id="create">Create Dealer</button>
+    <button id="list">List Dealers</button>
+  </div>
+
+  <pre id="out" style="background:#111;color:#eee;padding:12px;border-radius:8px;overflow:auto;"></pre>
+
+  <script>
+    let token = "";
+
+    const out = (x) => document.getElementById("out").textContent = JSON.stringify(x, null, 2);
+
+    document.getElementById("login").onclick = async () => {
+      const username = document.getElementById("u").value;
+      const password = document.getElementById("p").value;
+      const res = await fetch("/api/admin/login", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      token = data.token || "";
+      out(data);
+    };
+
+    document.getElementById("create").onclick = async () => {
+      const dealerId = document.getElementById("dealerId").value;
+      const pin = document.getElementById("pin").value;
+      const name = document.getElementById("name").value;
+      const res = await fetch("/api/admin/dealers", {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":"Bearer " + token
+        },
+        body: JSON.stringify({ dealerId, pin, name })
+      });
+      out(await res.json());
+    };
+
+    document.getElementById("list").onclick = async () => {
+      const res = await fetch("/api/admin/dealers", {
+        headers:{ "Authorization":"Bearer " + token }
+      });
+      out(await res.json());
+    };
+  </script>
+</body>
+</html>
