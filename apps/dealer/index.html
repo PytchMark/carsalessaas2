@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Carsales SaaS — Dealer</title>
+</head>
+<body style="font-family:system-ui;padding:24px">
+  <h1>Dealer</h1>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <input id="dealerId" placeholder="dealerId" value="dealerpytch" />
+    <input id="pin" placeholder="pin" value="123456" />
+    <button id="login">Login</button>
+  </div>
+
+  <hr />
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <input id="title" placeholder="vehicle title" value="2018 Toyota Corolla" />
+    <input id="status" placeholder="status (Draft/Published)" value="Published" />
+    <button id="create">Create Vehicle</button>
+    <button id="list">List Vehicles</button>
+  </div>
+
+  <pre id="out" style="background:#111;color:#eee;padding:12px;border-radius:8px;overflow:auto;"></pre>
+
+  <script>
+    let token = "";
+    let dealerId = "";
+
+    const out = (x) => document.getElementById("out").textContent = JSON.stringify(x, null, 2);
+
+    document.getElementById("login").onclick = async () => {
+      dealerId = document.getElementById("dealerId").value.trim();
+      const pin = document.getElementById("pin").value.trim();
+      const res = await fetch("/api/dealer/login", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ dealerId, pin })
+      });
+      const data = await res.json();
+      token = data.token || "";
+      out(data);
+    };
+
+    document.getElementById("create").onclick = async () => {
+      const title = document.getElementById("title").value;
+      const status = document.getElementById("status").value;
+      const res = await fetch(`/api/dealers/${dealerId}/vehicles`, {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":"Bearer " + token
+        },
+        body: JSON.stringify({ title, status })
+      });
+      out(await res.json());
+    };
+
+    document.getElementById("list").onclick = async () => {
+      const res = await fetch(`/api/dealers/${dealerId}/vehicles`, {
+        headers:{ "Authorization":"Bearer " + token }
+      });
+      out(await res.json());
+    };
+  </script>
+</body>
+</html>
